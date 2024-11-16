@@ -5,10 +5,8 @@ const bodyParser = require('body-parser');
 const app = express();
 const port = 5000;
 
-// Middleware to parse JSON bodies
 app.use(bodyParser.json());
 
-// MySQL Database Connection
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'pace',
@@ -16,7 +14,6 @@ const db = mysql.createConnection({
     database: 'capstone'
 });
 
-// Connect to MySQL
 db.connect(err => {
     if (err) {
         console.error('Database connection failed: ' + err.stack);
@@ -25,12 +22,11 @@ db.connect(err => {
     console.log('Connected to MySQL database');
 });
 
-// Basic Endpoint to Test Server
 app.get('/', (req, res) => {
     res.send('Web server is running and connected to the database!');
 });
 
-// Endpoint to READ data from the database
+// READ data from the database
 app.get('/players', (req, res) => {
     const query = 'SELECT * FROM nba_data';
     db.query(query, (err, results) => {
@@ -41,7 +37,7 @@ app.get('/players', (req, res) => {
     });
 });
 
-// Endpoint to WRITE data to the database
+// WRITE data to the database
 app.post('/players', (req, res) => {
     const { player_name, team_name, position, age, ppg, rpg, apg, spg, bpg, tpg } = req.body;
     const query = 
@@ -60,7 +56,7 @@ app.post('/players', (req, res) => {
     });
 });
 
-// Endpoint to UPDATE data in the database (PUT)
+// UPDATE data in the database (PUT)
 app.put('/players/:id', (req, res) => {
     const { id } = req.params;
     const { player_name, team_name, position, age, ppg, rpg, apg, spg, bpg, tpg } = req.body;
@@ -78,7 +74,7 @@ app.put('/players/:id', (req, res) => {
     });
 });
 
-// Endpoint to DELETE data from the database (DELETE)
+// DELETE data from the database (DELETE)
 app.delete('/players/:id', (req, res) => {
     const { id } = req.params;
     const query = 'DELETE FROM nba_data WHERE ID = ?';
@@ -91,7 +87,6 @@ app.delete('/players/:id', (req, res) => {
     });
 });
 
-// Start the Server
 app.listen(port, '0.0.0.0', () => {
     console.log(Server is running at http://localhost:${port});
 });
