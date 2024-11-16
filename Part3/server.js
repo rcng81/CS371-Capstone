@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const app = express();
 const port = 5000;
 
+// Middleware to parse JSON bodies
 app.use(bodyParser.json());
 
 // MySQL Database Connection
@@ -15,6 +16,7 @@ const db = mysql.createConnection({
     database: 'capstone'
 });
 
+// Connect to MySQL
 db.connect(err => {
     if (err) {
         console.error('Database connection failed: ' + err.stack);
@@ -23,6 +25,7 @@ db.connect(err => {
     console.log('Connected to MySQL database');
 });
 
+// Basic Endpoint to Test Server
 app.get('/', (req, res) => {
     res.send('Web server is running and connected to the database!');
 });
@@ -32,7 +35,6 @@ app.get('/players', (req, res) => {
     const query = 'SELECT * FROM nba_data';
     db.query(query, (err, results) => {
         if (err) {
-            console.error('Database error:', err);
             return res.status(500).json({ error: err.message });
         }
         res.status(200).json(results);
@@ -41,50 +43,55 @@ app.get('/players', (req, res) => {
 
 // Endpoint to WRITE data to the database
 app.post('/players', (req, res) => {
-    const { rank, name, team, position, age } = req.body;
-    if (!rank || !name || !team || !position || !age) {
-        return res.status(400).json({ error: 'All fields are required' });
-    }
-    const query = 'INSERT INTO nba_data (rank, name, team, position, age) VALUES (?, ?, ?, ?, ?)';
-    db.query(query, [rank, name, team, position, age], (err, results) => {
+    const { player_name, team_name, position, age, ppg, rpg, apg, spg, bpg, tpg } = req.body;
+    const query = 
+        INSERT INTO nba_data (player_name, team_name, position, age, ppg, rpg, apg, spg, bpg, tpg) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ;
+    db.query(query, [player_name, team_name, position, age, ppg, rpg, apg, spg, bpg, tpg], (err, results) => {
         if (err) {
             console.error('Database error:', err);
             return res.status(500).json({ error: err.message });
         }
-        res.status(201).json({ message: 'Player added successfully', data: results });
+        res.status(201).json({
+            message: 'Player added successfully',
+            data: { player_name, team_name, position, age, ppg, rpg, apg, spg, bpg, tpg }
+        });
     });
 });
 
 // Endpoint to UPDATE data in the database (PUT)
-app.put('/players/:rank', (req, res) => {
-    const { rank } = req.params;
-    const { name, team, position, age } = req.body;
-    if (!name || !team || !position || !age) {
-        return res.status(400).json({ error: 'All fields are required' });
-    }
-    const query = 'UPDATE nba_data SET name = ?, team = ?, position = ?, age = ? WHERE rank = ?';
-    db.query(query, [name, team, position, age, rank], (err, results) => {
+app.put('/players/:id', (req, res) => {
+    const { id } = req.params;
+    const { player_name, team_name, position, age, ppg, rpg, apg, spg, bpg, tpg } = req.body;
+    const query = 
+        UPDATE nba_data 
+        SET player_name = ?, team_name = ?, position = ?, age = ?, ppg = ?, rpg = ?, apg = ?, spg = ?, bpg = ?, tpg = ? 
+        WHERE ID = ?
+    ;
+    db.query(query, [player_name, team_name, position, age, ppg, rpg, apg, spg, bpg, tpg, id], (err, results) => {
         if (err) {
             console.error('Database error:', err);
             return res.status(500).json({ error: err.message });
         }
-        res.status(200).json({ message: 'Player updated successfully', affectedRows: results.affectedRows });
+        res.status(200).json({ message: 'Player updated successfully', data: results });
     });
 });
 
 // Endpoint to DELETE data from the database (DELETE)
-app.delete('/players/:rank', (req, res) => {
-    const { rank } = req.params;
-    const query = 'DELETE FROM nba_data WHERE rank = ?';
-    db.query(query, [rank], (err, results) => {
+app.delete('/players/:id', (req, res) => {
+    const { id } = req.params;
+    const query = 'DELETE FROM nba_data WHERE ID = ?';
+    db.query(query, [id], (err, results) => {
         if (err) {
             console.error('Database error:', err);
             return res.status(500).json({ error: err.message });
         }
-        res.status(200).json({ message: 'Player deleted successfully', affectedRows: results.affectedRows });
+        res.status(200).json({ message: 'Player deleted successfully', data: results });
     });
 });
 
+// Start the Server
 app.listen(port, '0.0.0.0', () => {
-    console.log(`Server is running at http://localhost:${port}`);
+    console.log(Server is running at http://localhost:${port});
 });
